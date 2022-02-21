@@ -16,7 +16,11 @@ function helpers.observe(peer, query, timeout)
         mq.cmdf('/dobserve %s -q "%s"', peer, query)
         Write.Debug(string.format('\ayAdding Observer - mq.TLO.DanNet(%s).O(%s)', peer, query))
     end
-    mq.delay(timeout or 1000, function() return mq.TLO.DanNet(peer).O(query).Received() > 0 end)
+    mq.delay(timeout or 1000, function() 
+        local value
+        value = mq.TLO.DanNet(peer).O(query).Received() or 1000
+        return value
+    end)
     local value = mq.TLO.DanNet(peer).O(query)()
     Write.Debug(string.format('\ayObserving - mq.TLO.DanNet(%s).O(%s) = %s', peer, query, value))
     return value

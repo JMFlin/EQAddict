@@ -1,10 +1,9 @@
 local mq = require('mq')
 local Write = require('lib/Write')
-local class = require('eqaddict/monk')
-local puller = require('eqaddict/pull/pull')
-local classutils = require('eqaddict/mnkutils')
+local traveler = require('eqaddict/utils/traveler')
 
-local events = require('eqaddict/events')
+local AddictCharacter
+local classutils
 
 -- Write config
 Write.prefix = function() return '\ax['..mq.TLO.Time()..'] [\agAddict\ax] ' end
@@ -12,16 +11,34 @@ Write.loglevel = 'debug'
 Write.usecolors = false
 
 -- "global" setup
-local targeterInstance = baseCharacter.new()
-local engagerInstance = extendingEngager.new()
-local pullerInstance = extendingPuller.new()
-local AddictCharacter = extendingCharacter.new()
+if mq.TLO.Me.Class.ShortName() == "SHM" then
+    classutils = require('eqaddict/classutils/shmutils')
+    AddictCharacter = Shaman.new()
+elseif mq.TLO.Me.Class.ShortName() == "MNK" then
+    classutils = require('eqaddict/classutils/mnkutils')
+    AddictCharacter = Monk.new()
+elseif mq.TLO.Me.Class.ShortName() == "WAR" then
+    classutils = require('eqaddict/classutils/warutils')
+    AddictCharacter = Warrior.new()
+elseif mq.TLO.Me.Class.ShortName() == "CLR" then
+    classutils = require('eqaddict/classutils/clrutils')
+    AddictCharacter = Cleric.new()
+end
+
 local enabled = true
-local amiready = true
 
 -- globals for events
-local CAST_FIZZLED = false
+local CASTFIZZLED = false
 local CANTSEETARGET = false
+local ISIMMUNE = false
+local ISINTERRUPTED = false
+
+-- globals for skill rotations via dannet
+if mq.TLO.Defined("ALLIANCETURN") then mq.cmd("/deletevar ALLIANCETURN") end
+mq.cmd('/declare ALLIANCETURN bool outer FALSE')
+
+if mq.TLO.Defined("AMIREADY") then mq.cmd("/deletevar AMIREADY") end
+mq.cmd('/declare AMIREADY bool outer FALSE')
 
 -- script functions
 local function print_usage_addict()
@@ -40,7 +57,6 @@ local function bind_addict(cmd, val1, val2)
     -- usage
     if cmd == nil then 
         print_usage_addict() 
-        return
     end
 
     -- on/off
@@ -60,7 +76,6 @@ local function bind_setmode(cmd)
     -- usage
     if cmd == nil then 
         print_usage_mode() 
-        return
     end
 
     -- modes
@@ -71,8 +86,8 @@ local function bind_setmode(cmd)
         AddictCharacter.setMode(Modes.MANUAL)
         Write.Info('\aySet mode to ' .. Modes.MANUAL)
     elseif cmd == 'camp' then
-        AddictCharacter.setMode(Modes.PULL_CAMP)
-        Write.Info('\aySet mode to ' .. Modes.PULL_CAMP)
+        AddictCharacter.setMode(Modes.CAMP)
+        Write.Info('\aySet mode to ' .. Modes.CAMP)
     end
 end
 
@@ -91,8 +106,10 @@ end
 
 local function setup()
     AddictCharacter.setMode(Modes.TRAVEL)
+    AddictCharacter.setAbilities()
+    AddictCharacter.setPuller()
+    if mq.TLO.Group.Leader.ID() == mq.TLO.Me.ID() then setGroupRoles() end
     check_plugins()
-    --load_settings()
 
     -- register binds
     mq.bind('/setmode', bind_setmode)
@@ -102,66 +119,90 @@ local function setup()
 
     print_usage_addict()
     print_usage_mode()
+
+    if mq.TLO.Me.Class.ShortName() == "SHM" then AddictCharacter.activateRotation(AddictCharacter.GroupShrink) end
 end
 
 local function in_game() return mq.TLO.MacroQuest.GameState() == 'INGAME' end
 
 local function main()
-    while true and enabled do
-        if in_game() then
-            while AddictCharacter.getMode() == Modes.MANUAL do mq.delay(1000) end
-            while AddictCharacter.getMode() == Modes.TRAVEL do
-                AddictCharacter.followTheLeader()
-                mq.delay(1000)
-            end
-            if AddictCharacter.getMode() == Modes.PULL_CAMP then
-                AddictCharacter.setCampSpot(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
-                pullerInstance.setCampSpot(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
-                while AddictCharacter.getMode() == Modes.PULL_CAMP do
-                    pullerInstance.pullRoutine()
-                    a = AddictCharacter.getOffensiveTarget()
-                    engagerInstance.engage(a)
-                    AddictCharacter.returnToCamp()
-                    mq.delay(500)
-                end
+    while enabled do
+        while AddictCharacter.getMode() == Modes.MANUAL and in_game() do mq.delay(1000) end
+        while AddictCharacter.getMode() == Modes.TRAVEL and in_game() do
+            Traveler.followTheLeader()
+            AddictCharacter.dead()
+            mq.delay(500)
+        end
+        if AddictCharacter.getMode() == Modes.CAMP then
+            if mq.TLO.Me.Class.ShortName() == "SHM" then AddictCharacter.activateRotation(AddictCharacter.GroupShrink) end
+            AddictCharacter.setCampSpot(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
+            while AddictCharacter.getMode() == Modes.CAMP and in_game() do
+                AddictCharacter.returnToCamp()
+                AddictCharacter.buffRotation()
+                AddictCharacter.rezzRotation()
+                AddictCharacter.pullRoutine()
+                AddictCharacter.getOffensiveTarget()
+                AddictCharacter.engageRangeOffensive()
+                AddictCharacter.engageMeleeOffensive()
+                AddictCharacter.engageDefensive()
+
+                -- downtime
+                AddictCharacter.createCampfire()
+                AddictCharacter.meditate()
+                AddictCharacter.dead()
+                mq.delay(500)
             end
         end
     end
 end
 
--- baseCharacter -> targeter -> engager -> puller -> character
-
--- baseCharacter -> targeter
--- baseCharacter -> engager -> puller -> character
-
--- baseCharacter -> FSM -> targeter
--- baseCharacter -> FSM -> engager -> puller  (+ sub state) -> character
-
-
--- Finite State Machine to handle state transitions:
---- From main states -> from pulling to engaging
---- From minor states -> pulling-gettarget to pulling-runtotarget
-
--- Engager class
---- Holds state about who to engage and attack
-
--- Puller class
---- Holds state on pull target
-
--- Healer class
---- Holds state on who to heal in group
-
-
 setup()
-AddictCharacter.setMode(Modes.PULL_CAMP)
+AddictCharacter.setMode(Modes.CAMP)
 main()
 
 
+-- baseCharacter -> traveler -> priest -> class
+-- baseCharacter -> targeter -> engager -> puller -> camper -> priest -> class -> missioner
 
--- create campfire function
--- cast_rezz to base class as abstract
--- rotations
--- engage
+
+
+-- This below requires state transition tables for minor states
+-- baseCharacter -> targeter -> player
+-- baseCharacter -> engager -> player
+-- baseCharacter -> puller -> priest -> class -> player
+-- baseCharacter -> camper -> player
+
+
+--state transitions within a class and a class decides what state is next.
+
+
+
+--[[
+    ${Me.Heading.DegreesCCW} gets your degrees you are facing
+so anything over your heading +- 45 would be outside of a 90 degree cone infront of you?
+]]
+
+
+-- SHOULD setTargetID also target??? If so then Pulling has to be done by internal local variable
+
+-- get out and come back
+-- alliance
+-- Tank should scan near group to see if mobs coming in (need to do noalert in an event)
+
+
+
+
+
+--gui
+----mode
+----state
+----own hp
+----own %end %mana
+----target
+----target %hp
+----Zone
+----closet other player
+---- https://www.dropbox.com/home/eq?preview=MQ2HUD.ini
 
 -- Things marked with ----- are examples of methods using them
 
