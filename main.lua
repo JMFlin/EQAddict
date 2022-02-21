@@ -222,14 +222,6 @@ so anything over your heading +- 45 would be outside of a 90 degree cone infront
 ---- followTheLeader
 ---- comeToMe
 
---- calculateCoordsBehindMe
---- calculateCoordsBehindTarget
--- ({*}---[*]--HERE) {*} is npc and [*] is tank
--- (HERE--{*}---[*])
-
--- campAtSpot(x,y,z)
---- (Caster may have to stand back to not be in an aura etc..)
-
 -- waitForInvis
 
 -- Toggles
@@ -239,8 +231,6 @@ so anything over your heading +- 45 would be outside of a 90 degree cone infront
 
 
 -- OTHER NOTES
----engage should have position as a param. engage(targetID: int, position: str, how: str) (position can be back, front, side) (how: range or melee??)
----Range only flag. They only use abilities that can hit from where they are
 
 -- Firewalker's Precision Strike does not share timer with Doomwalker's, you can use both (and also Icewalker's Precision Strike when you get there)
 
