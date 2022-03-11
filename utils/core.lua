@@ -9,6 +9,10 @@ NoAutoAttackBuffs = {
     'Sarnak Finesse'
 }
 
+NoCastBuffs = {
+    'Partial Shadow'
+}
+
 -- Enums
 Modes = {
     MANUAL = "Manual",
@@ -55,6 +59,7 @@ State = {
 
     local immuneTable = {}
     local abilityDelay = 200
+    local abilityDelayVariance = 100
 
     self.state = "Starting"
 
@@ -107,7 +112,7 @@ State = {
         return ISINTERRUPTED
     end
 
-    local function activate(command, skill)
+    local function activate(command, skill, castTime)
         local casting = true
         local fizzled = false
         local interrupted = false
@@ -117,11 +122,7 @@ State = {
         handleEventInterrupt()
         handleEventFizzle()
 
-        local spellCheck1 = mq.TLO.Spell(mq.TLO.Me.AltAbility(skill).Name()).MyCastTime() or 0
-        local spellCheck2 = mq.TLO.Spell(skill).MyCastTime() or 0
-        local spellCheck3 = mq.TLO.FindItem(skill).CastTime() or 0
-
-        if spellCheck1 > 0 or spellCheck2 > 0 or spellCheck3 > 0 then
+        if castTime > 0 then
             if mq.TLO.Stick.Active() then 
                 mq.cmd('/stick off')
                 mq.delay(200, function() return not mq.TLO.Stick.Active() end)
@@ -136,7 +137,7 @@ State = {
                 
                 -- Actually trigger the cast
                 mq.cmdf(command, skill)
-                mq.delay(500)
+                mq.delay(750)
 
                 -- If I am not casting anymore then get me out
                 while mq.TLO.Me.Casting.ID() ~= nil or mq.TLO.Window["CastingWindow"].Open() do mq.delay(250) end
@@ -156,6 +157,26 @@ State = {
             mq.cmdf(command, skill)
         end
         if self.getState() ~= State.TAG and self.getState() ~= State.PULL then mq.delay(mq.TLO.Spell(skill).RecoveryTime()) end
+    end
+
+    local function delaySelfBuffsToShowOnBuffWindow(skill)
+        if mq.TLO.Spell(skill).SpellType() == "Beneficial" and mq.TLO.Spell(skill).TargetType() == "Self" then
+            mq.delay(1000, function()
+                    local songCheck = mq.TLO.Me.Song(skill).ID() or 0
+                    local triggerSongCheck = mq.TLO.Me.Song(mq.TLO.Spell(skill).Trigger(1)()).ID() or 0
+                    local buffCheck = mq.TLO.Me.Buff(skill).ID() or 0
+                    local triggerBuffCheck = mq.TLO.Me.Buff(mq.TLO.Spell(skill).Trigger(1)()).ID() or 0
+                    local discCheck = mq.TLO.Me.CombatAbility(mq.TLO.Me.CombatAbility(skill)).ID() or 0
+                    local activeDiscID = mq.TLO.Me.ActiveDisc.ID() or 0
+                    local checker = false
+                    if songCheck > 0 or triggerSongCheck > 0 or buffCheck > 0 or triggerBuffCheck > 0 or discCheck == activeDiscID then
+                        checker = true
+                    end
+                    if not checker then Write.Debug("Delaying for \ao" .. skill .. " \awto be registered") end
+                    return checker
+                end
+            )
+        end
     end
 
     local function validateCommonActivate(name)
@@ -189,9 +210,11 @@ State = {
         
         if targetID ~= self.getTargetID() then return false end
 
-        if mq.TLO.Spell(name).SpellType() ~= "Beneficial" then
-            if not mq.TLO.Spawn("id " .. self.getTargetID()).LineOfSight() then return false end
-            if mq.TLO.Spawn("id " .. self.getTargetID()).PctHPs() == nil then return false end
+        if self.getState() ~= State.TAG and self.getState() ~= State.PULL then
+            if mq.TLO.Spell(name).SpellType() ~= "Beneficial" then
+                if not mq.TLO.Spawn("id " .. self.getTargetID()).LineOfSight() then return false end
+                if mq.TLO.Spawn("id " .. self.getTargetID()).PctHPs() == nil then return false end
+            end
         end
 
         if mq.TLO.Spell(name).MyRange() ~= nil then
@@ -214,22 +237,28 @@ State = {
     local function activateAA(aaName)
         if not validateCommonActivate(aaName) then return end
         if not mq.TLO.Me.AltAbilityReady(aaName)() then return end
-        Write.Info("Using AA \ao" .. aaName)
-        activate('/alt act %d', mq.TLO.Me.AltAbility(aaName).ID())
+        castTime = mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Name()).MyCastTime() or 0
+        Write.Info("Using AA \ao" .. aaName .. " \awwith cast time " .. castTime)
+        activate('/alt act %d', mq.TLO.Me.AltAbility(aaName).ID(), castTime)
+        delaySelfBuffsToShowOnBuffWindow(aaName)
     end
 
     local function activateSpell(spellName)
         if not validateCommonActivate(spellName) then return end
         if not mq.TLO.Me.SpellReady(spellName)() then return end
-        Write.Info("Using spell \ao" .. spellName)
-        activate('/cast %d', mq.TLO.Me.Gem(spellName)())
+        castTime = mq.TLO.Spell(spellName).MyCastTime() or 0
+        Write.Info("Using spell \ao" .. spellName .. " \awwith cast time " .. castTime)
+        activate('/cast %d', mq.TLO.Me.Gem(spellName)(), castTime)
+        delaySelfBuffsToShowOnBuffWindow(spellName)
     end
 
     local function activateDisc(discName)
         if not validateCommonActivate(discName) then return end
         if not mq.TLO.Me.CombatAbilityReady(discName)() then return end
-        Write.Info("Using disc \ao" .. discName)
-        activate('/disc %d', mq.TLO.Me.CombatAbility(mq.TLO.Me.CombatAbility(discName)).ID())
+        castTime = mq.TLO.Spell(discName).MyCastTime() or 0
+        Write.Info("Using disc \ao" .. discName .. " \awwith cast time " .. castTime)
+        activate('/disc %d', mq.TLO.Me.CombatAbility(mq.TLO.Me.CombatAbility(discName)).ID(), castTime)
+        delaySelfBuffsToShowOnBuffWindow(discName)
     end
 
     local function activateAbility(abilityName)
@@ -242,9 +271,11 @@ State = {
     local function activateItem(itemName)
         if not validateCommonActivate(itemName) then return end
         if mq.TLO.FindItem(itemName)() == nil then return end
-        if not mq.TLO.FindItem(itemName).Timer.TotalSeconds() == 0 or not mq.TLO.Me.ItemReady(itemName)() then return end
-        Write.Info("Using item \ao" .. itemName)
-        activate('/useitem %s', itemName)
+        if mq.TLO.FindItem(itemName).Timer.TotalSeconds() > 0 or not mq.TLO.Me.ItemReady(itemName)() then return end
+        castTime = mq.TLO.FindItem(itemName).CastTime() or 0
+        Write.Info("Using item \ao" .. itemName .. " \awwith cast time " .. castTime)
+        activate('/useitem %s', itemName, castTime)
+        delaySelfBuffsToShowOnBuffWindow(itemName)
     end
 
     function self.activateRotation(rotation)
@@ -257,6 +288,7 @@ State = {
                     activateSpell(k)
                     activateAbility(k)
                     activateItem(k)
+                    mq.delay(math.random(abilityDelay - abilityDelayVariance, abilityDelay + abilityDelayVariance))
                 end
             end
         end
@@ -323,7 +355,7 @@ State = {
         if mq.TLO.Stick.Status() == "ON" then mq.cmd("/stick off") end
 
         -- turn autoattack off
-        if mq.TLO.Me.CombatState() == "COMBAT" then mq.cmd("/attack off") end
+        if not mq.TLO.Me.Combat() then mq.cmd('/attack off') end
 
         -- check pet
         if mq.TLO.Me.Pet.ID() and mq.TLO.Me.Pet.Combat() then mq.cmd("/pet back off") end
@@ -395,7 +427,7 @@ State = {
 
     function self.setState(state)
         if self.state ~= state then
-            Write.Debug("Setting state from \a-g" .. self.state .. " \awto \a-t" .. state) 
+--            Write.Debug("Setting state from \a-g" .. self.state .. " \awto \a-t" .. state) 
             self.state = state
         end
     end

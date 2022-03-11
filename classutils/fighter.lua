@@ -133,36 +133,6 @@ Fighter.new = function(name, class)
         return "None"
     end
 
-
-    function self.setupMeleeSkills()
-
-        if mq.TLO.Me.Class.ShortName() == "BRD" then
-            if not mq.TLO.Skill("Kick").Auto() then mq.cmd("/autoskill Kick") end
-        end
-
-        if mq.TLO.Me.Class.ShortName() == "BST" then
-            if not mq.TLO.Skill("Eagle Strike").Auto() then mq.cmd("/autoskill Eagle Strike") end
-            if not mq.TLO.Skill("Round Kick").Auto() then mq.cmd("/autoskill Round Kick") end
-        end
-
-        if mq.TLO.Me.Class.ShortName() == "ROG" then
-            if not mq.TLO.Skill("Backstab").Auto() then mq.cmd("/autoskill Backstab") end
-        end
-
-        if mq.TLO.Me.Class.ShortName() == "BER" then
-            if not mq.TLO.Skill("Frenzy").Auto() then mq.cmd("/autoskill Frenzy") end
-        end
-
-        if mq.TLO.Me.Class.ShortName() == "MNK" then
-            if not mq.TLO.Skill("Tiger Claw").Auto() then mq.cmd("/autoskill Tiger Claw") end
-            if not mq.TLO.Skill("Flying Kick").Auto() then mq.cmd("/autoskill Flying Kick") end
-        end
-
-        if mq.TLO.Me.Class.ShortName() == "WAR" or mq.TLO.Me.Class.ShortName() == "PAL" or mq.TLO.Me.Class.ShortName() == "SHD" then
-            if not mq.TLO.Skill("Bash").Auto() then mq.cmd("/autoskill Bash") end
-        end
-    end
-
     function self.checkAoEAggro()
         for i=1, mq.TLO.Me.XTarget() do
             if mq.TLO.Me.XTarget(i).Distance() <= self.assistRange + 50 then
@@ -255,19 +225,10 @@ Fighter.new = function(name, class)
 
             self.setState(State.MELEECOMBAT)
 
-            if self.validateTargetBuffs() then
+            if mq.TLO.Me.ID() == mq.TLO.Group.MainTank.ID() or self.validateTargetBuffsMelee() then
                 self.petAttack()
 
-                mq.cmd('/attack on')
-                mq.delay(100)
-
-                if mq.TLO.Me.ID() == mq.TLO.Group.MainTank.ID() then
-                    if not mq.TLO.Stick.Active() then mq.cmd('/stick 50% moveback loose') end
-                end
-
-                if mq.TLO.Me.ID() ~= mq.TLO.Group.MainTank.ID() then
-                    if not mq.TLO.Stick.Active() then mq.cmdf('/stick 80% %s loose', self.stick) end
-                end
+                self.combatStick()
 
                 if next(self.Debuffs) then
                     if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Debuffs) end
@@ -282,21 +243,19 @@ Fighter.new = function(name, class)
                 end
 
                 if next(self.OffensiveRotation2) then
-                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.OffensiveRotation1) end
+                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.OffensiveRotation2) end
                 end
 
                 if next(self.OffensiveRotation3) then
-                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.OffensiveRotation1) end
+                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.OffensiveRotation3) end
                 end
 
                 if next(self.OffensiveRotation4) then
-                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.OffensiveRotation1) end
+                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.OffensiveRotation4) end
                 end
             else
-                mq.cmd('/attack off')
-                mq.delay(100)
-                mq.cmd('/pet back off')
-                mq.delay(100)
+                if mq.TLO.Me.Combat() then mq.cmd('/attack off') mq.delay(100) end
+                if mq.TLO.Me.Pet.Combat() then mq.cmd('/pet back off') mq.delay(100) end
             end
         end
     end
@@ -326,15 +285,15 @@ Fighter.new = function(name, class)
         end
 
         if next(self.DefensiveRotation2) then
-            if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.DefensiveRotation1) end
+            if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.DefensiveRotation2) end
         end
 
         if next(self.DefensiveRotation3) then
-            if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.DefensiveRotation1) end
+            if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.DefensiveRotation3) end
         end
 
         if next(self.DefensiveRotation4) then
-            if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.DefensiveRotation1) end
+            if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.DefensiveRotation4) end
         end
         
         if next(self.Utility) then

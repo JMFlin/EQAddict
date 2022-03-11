@@ -9,19 +9,101 @@ extendingEngager = {}
 extendingEngager.new = function(name, class)
     local self = extendingTargeter.new(name, class)
 
-    self.assistRange = 80
+    self.assistRange = 120
     self.assistAt = 98
-    self.stick = '!front'
     self.attackHow = 'melee'
+    self.stick = '!front'
 
 
     function self.setAssistAt(value) self.assistAt = value end
 
-    function self.validateTargetBuffs()
-        for key, value in pairs(NoAutoAttackBuffs) do
-            if mq.TLO.Spawn("id " .. self.getTargetID()).Buff(value).ID() then
-                Write.Info("Not auto attacking because target has debuff \ar" .. value)
-                return false
+
+    function self.setupMeleeSkills()
+
+        if mq.TLO.Me.Class.ShortName() == "BRD" or mq.TLO.Me.Class.ShortName() == "RNG" then
+            if not mq.TLO.Skill("Kick").Auto() then mq.cmd("/autoskill Kick") end
+        end
+
+        if mq.TLO.Me.Class.ShortName() == "BST" then
+            if not mq.TLO.Skill("Eagle Strike").Auto() then mq.cmd("/autoskill Eagle Strike") end
+            if not mq.TLO.Skill("Round Kick").Auto() then mq.cmd("/autoskill Round Kick") end
+        end
+
+        if mq.TLO.Me.Class.ShortName() == "ROG" then
+            if not mq.TLO.Skill("Backstab").Auto() then mq.cmd("/autoskill Backstab") end
+        end
+
+        if mq.TLO.Me.Class.ShortName() == "BER" then
+            if not mq.TLO.Skill("Frenzy").Auto() then mq.cmd("/autoskill Frenzy") end
+        end
+
+        if mq.TLO.Me.Class.ShortName() == "MNK" then
+            if not mq.TLO.Skill("Tiger Claw").Auto() then mq.cmd("/autoskill Tiger Claw") end
+            if not mq.TLO.Skill("Flying Kick").Auto() then mq.cmd("/autoskill Flying Kick") end
+        end
+
+        if mq.TLO.Me.Class.ShortName() == "WAR" or mq.TLO.Me.Class.ShortName() == "PAL" or mq.TLO.Me.Class.ShortName() == "SHD" or mq.TLO.Me.Class.ShortName() == "CLR" then
+            if not mq.TLO.Skill("Bash").Auto() then mq.cmd("/autoskill Bash") end
+        end
+
+    end
+
+    function self.combatStick()
+        local stick
+
+        if not mq.TLO.Me.Combat() then 
+            mq.cmd('/attack on')
+            mq.delay(500, function() return mq.TLO.Me.Combat() end)
+        end
+
+        if mq.TLO.Me.ID() == mq.TLO.Group.MainTank.ID() then
+            if not mq.TLO.Stick.Active() then
+                mq.cmd('/stick 50% moveback loose')
+                mq.delay(500, function() return mq.TLO.Stick.Active() end)
+            end
+        end
+
+        if mq.TLO.Me.ID() ~= mq.TLO.Group.MainTank.ID() then
+            if not mq.TLO.Stick.Active() then
+                mq.cmd('/stick ' .. math.floor(math.random(35, 65)) .. '% ' .. self.stick .. ' loose')
+                mq.delay(500, function() return mq.TLO.Stick.Active() end)
+            end
+        end
+    end
+
+    function self.validateTargetBuffsMelee()
+        local buffName
+
+        for i=1, mq.TLO.Target.BuffCount() do
+            
+            buffName = mq.TLO.Spawn("id " .. self.getTargetID()).Buff(i).Name()
+            for i=1, 21 do
+                effectSPA = mq.TLO.Spell(buffName).Attrib(i)()
+                -- DS: effectSPA == 59
+                if effectSPA == 173 then 
+                    Write.Info("Not auto attacking because target has riposte SPA \ar" .. effectSPA)
+                    return false 
+                end
+            end
+        end
+        return true
+    end
+
+    function self.validateTargetBuffsCaster()
+        local buffName
+        local buffsCount = mq.TLO.Target.BuffCount() or 0
+
+        if buffsCount > 0 then
+            for i=1, mq.TLO.Target.BuffCount() do
+                
+                buffName = mq.TLO.Spawn("id " .. self.getTargetID()).Buff(i).Name()
+                for i=1, 21 do
+                    effectSPA = mq.TLO.Spell(buffName).Attrib(i)()
+                    if effectSPA == 158 then 
+                        Write.Info("Not casting because target has reflect SPA \ar" .. effectSPA)
+                        return false 
+                    end
+                end
             end
         end
         return true
@@ -57,21 +139,18 @@ extendingEngager.new = function(name, class)
     end
 
     function self.petAttack()
-        if mq.TLO.Me.Pet.ID() then
+        if mq.TLO.Me.Pet.ID() > 0 then
             if mq.TLO.Me.Pet.Target.ID() ~= self.getTargetID() then mq.cmd('/pet attack') end
             mq.delay(100)
             if mq.TLO.Me.Pet.Target.ID() ~= self.getTargetID() then  mq.cmd('/pet swarm') end
             mq.delay(100)
-            if mq.TLO.Group.MainTank.ID() ~= nil then
-                if mq.TLO.Me.XTarget() > 0 then
-                    if mq.TLO.Spawn("id " .. mq.TLO.Group.MainTank.ID() .. " pccorpse radius 100").ID() > 0 and not mq.TLO.Me.Pet.Taunt() then
-                        mq.cmd('/pet taunt on')
-                        mq.delay(100)
-                        self.activateAA("Companion's Fortification")
-                    end
+            if mq.TLO.Me.XTarget() > 0 then
+                if ((mq.TLO.Group.MainTank.ID() ~= nil or mq.TLO.Spawn("id " .. mq.TLO.Group.MainTank.ID() .. " pccorpse radius 100").ID() > 0) and not mq.TLO.Me.Pet.Taunt()) then
+                    mq.cmd('/pet taunt on')
+                    mq.delay(100)
                 end
-                if not mq.TLO.Spawn("id " .. mq.TLO.Group.MainTank.ID() .. " pccorpse radius 100").ID() and mq.TLO.Me.Pet.Taunt() then mq.cmd('/pet taunt off') end
             end
+            if not mq.TLO.Spawn("id " .. mq.TLO.Group.MainTank.ID() .. " pccorpse radius 100").ID() and mq.TLO.Me.Pet.Taunt() then mq.cmd('/pet taunt off') end
         end
     end
 

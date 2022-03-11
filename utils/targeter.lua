@@ -145,8 +145,8 @@ extendingTargeter.new = function(name, class)
             if mq.TLO.Me.XTarget(i).Distance() <= self.assistRange + 50 then
                 if mq.TLO.Me.XTarget(i).PctAggro() < 100 then
                     self.setTargetID(mq.TLO.Me.XTarget(i).ID())
-                    mq.cmdf('/mqtarget id ', self.getTargetID())
-                    mq.delay(250, function() return self.getTargetID() == targetID end)
+                    mq.cmdf('/mqtarget id %d', self.getTargetID())
+                    mq.delay(500, function() return self.getTargetID() == mq.TLO.Me.XTarget(i).ID() end)
                     break
                 end
             end
@@ -165,7 +165,7 @@ extendingTargeter.new = function(name, class)
                 self.setState(State.MEMBERTARGET)
                 self.setTargetID(mq.TLO.Me.XTarget(1).ID())
                 mq.cmdf('/mqtarget id %d', self.getTargetID())
-                mq.delay(250, function() return self.getTargetID() == targetID end)
+                mq.delay(250, function() return self.getTargetID() == mq.TLO.Me.XTarget(1).ID() end)
             elseif mq.TLO.Me.ID() == mq.TLO.Group.MainAssist.ID() then
                 self.setState(State.MATARGET)
                 getTargetMA()

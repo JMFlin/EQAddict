@@ -227,6 +227,7 @@ Priest.new = function(name, class)
 
     local function getSpellName(k, i)
         local spellName, effectSPA
+
         effectSPA = mq.TLO.AltAbility(k).Spell.Attrib(i)()
         if effectSPA == nil then effectSPA = mq.TLO.Spell(k).Attrib(i)() end
 
@@ -481,6 +482,7 @@ Priest.new = function(name, class)
         if next(self.selfBuffs) then
             castBuffs(checkBuffsWithoutObserver(self.selfBuffs))
         end
+
     end
 
     function self.engageMeleeOffensive()
@@ -494,32 +496,21 @@ Priest.new = function(name, class)
 
             self.setState(State.MELEECOMBAT)
 
-            if self.validateTargetBuffs() then
+            if mq.TLO.Me.ID() == mq.TLO.Group.MainTank.ID() or self.validateTargetBuffsCaster() then
                 self.petAttack()
 
                 if next(self.Debuffs) then
                     if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Debuffs) end
                 end
 
-                mq.cmd('/attack on')
-                mq.delay(100)
-
-                if mq.TLO.Me.ID() == mq.TLO.Group.MainTank.ID() then
-                    if not mq.TLO.Stick.Active() then mq.cmd('/stick 12 moveback loose') end
-                end
-    
-                if mq.TLO.Me.ID() ~= mq.TLO.Group.MainTank.ID() then
-                    if not mq.TLO.Stick.Active() then mq.cmdf('/stick 12 hold moveback %s loose', self.stick) end
-                end
+                self.combatStick()
 
                 if next(self.Offensive) then
                     if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Offensive) end
                 end
             else
-                mq.cmd('/attack off')
-                mq.delay(100)
-                mq.cmd('/pet back off')
-                mq.delay(100)
+                if mq.TLO.Me.Combat() then mq.cmd('/attack off') mq.delay(100) end
+                if mq.TLO.Me.Pet.Combat() then mq.cmd('/pet back off') mq.delay(100) end
             end
         end
     end
@@ -529,14 +520,18 @@ Priest.new = function(name, class)
 
         if self.validateCombat() then
 
-            self.setState(State.RANGEDCOMBAT)
+            if self.validateTargetBuffsCaster() then
 
-            if next(self.Debuffs) then
-                if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Debuffs) end
-            end
+                self.setState(State.RANGEDCOMBAT)
 
-            if next(self.Offensive) then
-                if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Offensive) end
+                if next(self.Debuffs) then
+                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Debuffs) end
+                end
+
+                if next(self.Offensive) then
+                    if mq.TLO.Me.XTarget() > 0 and mq.TLO.Target.ID() ~= nil then self.activateRotation(self.Offensive) end
+                end
+
             end
 
         end

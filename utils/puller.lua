@@ -248,26 +248,37 @@ extendingPuller.new = function(name, class)
     end
 
     local function tagPullTarget()
-        local counter = 0
-
-        while mq.TLO.Me.XTarget() == 0 do
+--        local counter = 0
             
-            self.activateRotation(self.PullsTag)
-            mq.delay(500, function() return mq.TLO.Me.XTarget() > 0 end)
-            
-            if mq.TLO.Me.XTarget() == 0 then
-                setPullTarget()
-                navToPullTarget()
-            end
-            
+        self.activateRotation(self.PullsTag)
+        mq.delay(1000, function() return mq.TLO.Me.XTarget() > 0 end)
+        
+--[[
+        if mq.TLO.Me.XTarget() == 0 then
             counter = counter + 1
             if counter == 4 then
                 Write.Debug("\a-rAdding \a-p" .. self.getTargetID() .. " \a-rto ignore")
                 mq.cmd('/squelch /alert add 1 id ' .. self.getTargetID())
             end
+        end
+]]
+        mq.doevents("cantCastOnTarget")
+        if CANTCASTONTARGET then
+            Write.Debug("\a-rAdding \a-p" .. self.getTargetID() .. " \a-rto ignore")
+            mq.cmd('/squelch /alert add 1 id ' .. self.getTargetID())
+            CANTCASTONTARGET = false
+            return
+        end
 
-            mq.doevents("cantSeeTarget")
-            if CANTSEETARGET then self.nudgeForward() CANTSEETARGET = false end
+        mq.doevents("cantSeeTarget")
+        if CANTSEETARGET then
+            CANTSEETARGET = false
+            for i=1, 3 do
+                self.nudgeForward()
+                self.activateRotation(self.PullsTag)
+                mq.delay(1000, function() return mq.TLO.Me.XTarget() > 0 end)
+                if mq.TLO.Me.XTarget() > 0 then return end
+            end
         end
     end
 
@@ -349,17 +360,19 @@ extendingPuller.new = function(name, class)
 
         Write.Debug("Self and group validations passed!")
 
-        setPullTarget()
+        while mq.TLO.Me.XTarget() == 0 do
+            setPullTarget()
 
-        if self.getTargetID() == 0 then mq.delay(5000) return end
+            if self.getTargetID() == 0 then mq.delay(5000) return end
 
-        -- Pass target to navigate to target
-        if selfValidatePullStart() then navToPullTarget() end
+            -- Pass target to navigate to target
+            if selfValidatePullStart() then navToPullTarget() end
 
-        self.setState(State.TAG)
-        -- Pass target to tag logic
-        if selfValidatePullStart() then tagPullTarget() end
-        
+            self.setState(State.TAG)
+            -- Pass target to tag logic
+            if selfValidatePullStart() then tagPullTarget() end
+        end
+
         self.setState(State.PULL)
 
         if mq.TLO.Group.MainTank.ID() ~= nil and mq.TLO.Group.MainTank.ID() ~= mq.TLO.Me.ID() then
@@ -370,19 +383,8 @@ extendingPuller.new = function(name, class)
 
         while mq.TLO.Me.Moving() do mq.delay(200, function() return not mq.TLO.Me.Moving() end) end
         if mq.TLO.Target.ID() ~= nil then mq.cmd('/face') end
+        if mq.TLO.Spawn("id " .. self.getTargetID()).Distance3D() > 100 then self.activateRotation(PullsMove) end
 
-        --[[
-        local i = 0
-        while mq.TLO.Me.XTarget() > 0 do
-            if mq.TLO.Spawn("id " .. self.getTargetID()).Distance3D() > 100 then self.activateRotation(PullsMove) end
-            if mq.TLO.Spawn("id " .. self.getTargetID()).Distance3D() < 100 then break end
-            if self.getTargetID() ~= mq.TLO.Target.ID() then break end
-            mq.delay(1000)
-            i = i +1
-            if i > 5 then break end
-        end
-        ]]
-        -- /varset PullerIsPulling FALSE
         self.setState(State.MELEECOMBAT)
     end
 

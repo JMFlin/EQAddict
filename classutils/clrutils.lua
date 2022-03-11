@@ -24,7 +24,7 @@ Cleric.new = function(name, class)
 
         -- Self buffs
         SaintsUnity = "Saint's Unity",
-        Armor = "Armor of the Ardent",
+--        Armor = "Armor of the Ardent",
 
         -- Self utility
         SelfCureAA = "Purified Spirits",
@@ -381,9 +381,21 @@ Cleric.new = function(name, class)
         -- go buy saints unity spell
         self.selfBuffs = {
             [1] = {[self.Common.SaintsUnity] = function() return true end},
-            [2] = {[self.Common.Armor] = function() return true end},
-            [3] = {[self.Common.Aura1] = function() return true end},
-            [4] = {[self.Common.Aura2] = function() return true end},
+ --[[
+            [2] = {[self.Common.Armor] = function() 
+                if mq.TLO.Group() then
+                    for i=1, tonumber(mq.TLO.Group()) do
+                        if mq.TLO.Group.Member(i).Class.ShortName() == "SHM" then 
+                            return false
+                        end
+                    end
+                end
+
+                return true end
+            },
+]]
+            [2] = {[self.Common.Aura1] = function() return true end},
+            [3] = {[self.Common.Aura2] = function() return true end},
         }
 
 
@@ -543,14 +555,14 @@ Cleric.new = function(name, class)
             [2] = {[self.Common.Ward] = function() 
                 local targetID = mq.TLO.Target.ID() or 0
                 local tankID = mq.TLO.Group.MainTank.ID() or 0
-                local tankHPs = mq.TLO.Spawn("id " .. targetID).PctHPs()
 
                 if tankID > 0 then
-                    if tankHPs > 85 then
-                        if targetID ~= tankID then
-                            mq.cmdf('/target id %d', tankID)
-                            mq.delay(200)
-                        end
+                    if targetID ~= tankID then
+                        mq.cmdf('/target id %d', tankID)
+                        mq.delay(200)
+                        targetID = tankID
+                    end
+                    if mq.TLO.Spawn("id " .. targetID).PctHPs() > 85 then
                         self.setTargetID(tankID)
                         return true
                     end
@@ -690,6 +702,7 @@ Cleric.new = function(name, class)
         self.setPullingObservers()
 
         self.setAssistAt(98)
+        self.setupMeleeSkills()
     end
 
     return self

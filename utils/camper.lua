@@ -131,9 +131,22 @@ extendingCamper.new = function(name, class)
         local x = X or self.getXCampCoord() 
         local y = Y or self.getYCampCoord()
         local z = Z or self.getZCampCoord()
+        local theta, r, newX, newY
 
         if x == 0 and y == 0 and z == 0 then return end
-        
+
+        -- Get random spot in camp circle
+        r = radius * math.sqrt(math.random(0, 1))
+        theta = math.random(0, 1) * 2 * math.pi
+        newX = x + r * math.cos(theta)
+        newY = y + r * math.sin(theta)
+
+        -- Does path exist to our new spot in circle? (Think Stratos etc where it might not...)
+        if mq.TLO.Navigation.PathExists("loc " .. newY .. " " .. newX .. " " .. z)() then
+            x = newX
+            y = newY
+        end
+
         -- If we are moving then return
         if mq.TLO.Navigation.Active() then mq.cmd('/nav off') end
 
@@ -163,14 +176,14 @@ extendingCamper.new = function(name, class)
 
         -- If we have engaged then stick off
         if mq.TLO.Stick.Status() == "ON" then mq.cmd('/stick off') end
+        mq.delay(200, function() return not mq.TLO.Stick.Active() end)
 
         -- If we are at camp then return
         if distance3D(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z(), x, y, z) <= radius then return end
 
         -- Run to camp
+        Write.Debug("Return to spot " .. x .. " " .. y .. " " .. z)
         while distance3D(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z(), x, y, z) > radius do
-            Write.Debug("My distance from camp spot is " .. distance3D(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z(), x, y, z))
-            Write.Debug("Allowed distance is " .. radius)
             if not mq.TLO.Me.Standing() then mq.cmd('/stand') end
             if not mq.TLO.Navigation.Active() then mq.cmdf('/nav locxyz %d %d %d', x, y, z) end
             if mq.TLO.Me.Pet.ID() and mq.TLO.Me.Pet.Combat() then mq.cmd('/pet back') end

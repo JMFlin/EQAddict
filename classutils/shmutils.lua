@@ -9,7 +9,7 @@ Shaman.new = function(name, class)
     local abilitiesTable = {
 
         -- Travel stuff
-        GroupSpeed = "Communion of the Cheetah",
+        GroupCheetah = "Communion of the Cheetah",
         GroupInvis = "Group Silent Presence",
 
         -- Group buffs
@@ -471,7 +471,7 @@ if it triggers best in group, and that has triggers then you get each trigger fr
         }
 
         self.Travel = {
-            [1] = {[self.Common.GroupSpeed] = function()
+            [1] = {[self.Common.GroupCheetah] = function()
                 if not mq.TLO.Me.Invis() then
                     return true
                 end
@@ -495,6 +495,7 @@ if it triggers best in group, and that has triggers then you get each trigger fr
             [1] = {[self.Common.GroupFocus] = function() return true end},
             [2] = {[self.Common.GroupHaste] = function() return true end},
             [3] = {[self.Common.GroupSpeed] = function() return true end},
+            [4] = {[self.Common.GroupCheetah] = function() return true end},
         }
 
         self.selfBuffs = {
@@ -504,6 +505,7 @@ if it triggers best in group, and that has triggers then you get each trigger fr
             [4] = {[self.Common.GroupFocus] = function() return true end},
             [5] = {[self.Common.GroupHaste] = function() return true end},
             [6] = {[self.Common.GroupSpeed] = function() return true end},
+            [7] = {[self.Common.GroupCheetah] = function() return true end},
         }
 
         self.Utility = {
@@ -709,6 +711,7 @@ if it triggers best in group, and that has triggers then you get each trigger fr
         self.setPullingObservers()
 
         self.setAssistAt(100)
+        self.setupMeleeSkills()
     end
 
     return self

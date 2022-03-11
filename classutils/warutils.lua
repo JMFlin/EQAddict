@@ -300,7 +300,7 @@ Warrior.new = function(name, class)
                 return false
             end},
             [2] = {[self.Common.Dicho] = function() -- SPA451
-                local PDH = mq.TLO.Me.Buff(self.Common.PDH).ID() or 0
+                local PDH = mq.TLO.Me.Song(mq.TLO.Spell(self.Common.PDH).Trigger(1)()).ID() or 0
                 local WarlordsBravery = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0
 
                 if mq.TLO.Me.XTarget() > 0 and PDH == 0 and WarlordsBravery == 0 then
@@ -309,9 +309,9 @@ Warrior.new = function(name, class)
                 return false
             end},
             [3] = {[self.Common.CoABP] = function() -- SPA197
-                local myBuff = mq.TLO.Me.Buff(self.Common.Dicho).ID() or 0
+                local Dicho = mq.TLO.Me.Buff(self.Common.Dicho).ID() or 0
 
-                if mq.TLO.Me.XTarget() > 0 and myBuff > 0 then
+                if mq.TLO.Me.XTarget() > 0 and Dicho > 0 then
                     return true
                 end
                 return false
@@ -329,7 +329,7 @@ Warrior.new = function(name, class)
             end},
             [2] = {[self.Common.PDH] = function() -- SPA162
                 local Dicho = mq.TLO.Me.Buff(self.Common.Dicho).ID() or 0
-                local WarlordsBravery = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0
+                local WarlordsBravery = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0 
 
                 if mq.TLO.Me.XTarget() > 0 and Dicho == 0 and WarlordsBravery == 0 then
                     return true
@@ -337,25 +337,25 @@ Warrior.new = function(name, class)
                 return false
             end},
             [3] = {[self.Common.BP] = function() -- SPA451
-                local myBuff = mq.TLO.Me.Buff(self.Common.PDH).ID() or 0
+                local PDH = mq.TLO.Me.Song(mq.TLO.Spell(self.Common.PDH).Trigger(1)()).ID() or 0
 
-                if mq.TLO.Me.XTarget() > 0 and myBuff > 0 then
+                if mq.TLO.Me.XTarget() > 0 and PDH > 0 then
                     return true
                 end
                 return false
             end},
             [4] = {[self.Common.ImperatorsCommand] = function()
-                local myBuff = mq.TLO.Me.Buff(self.Common.PDH).ID() or 0
+                local PDH = mq.TLO.Me.Song(mq.TLO.Spell(self.Common.PDH).Trigger(1)()).ID() or 0
 
-                if mq.TLO.Me.XTarget() > 0 and myBuff > 0 then
+                if mq.TLO.Me.XTarget() > 0 and PDH > 0 then
                     return true
                 end
                 return false
             end},
             [5] = {[self.Common.Spire] = function() -- SPA175
-                local myBuff = mq.TLO.Me.Buff(self.Common.PDH).ID() or 0
+                local PDH = mq.TLO.Me.Song(mq.TLO.Spell(self.Common.PDH).Trigger(1)()).ID() or 0
 
-                if mq.TLO.Me.XTarget() > 0 and myBuff > 0 then
+                if mq.TLO.Me.XTarget() > 0 and PDH > 0 then
                     return true
                 end
                 return false
@@ -373,7 +373,7 @@ Warrior.new = function(name, class)
             end},
             [2] = {[self.Common.WarlordsBravery] = function() -- SPA197
                 local Dicho = mq.TLO.Me.Buff(self.Common.Dicho).ID() or 0
-                local PDH = mq.TLO.Me.Buff(self.Common.PDH).ID() or 0
+                local PDH = mq.TLO.Me.Song(mq.TLO.Spell(self.Common.PDH).Trigger(1)()).ID() or 0
 
                 if mq.TLO.Me.XTarget() > 0 and Dicho == 0 and PDH == 0 then
                     return true
@@ -381,17 +381,17 @@ Warrior.new = function(name, class)
                 return false
             end},
             [3] = {[self.Common.Bulwark] = function() -- SPA451
-                local myBuff = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0
+                local Bravery = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0
 
-                if mq.TLO.Me.XTarget() > 0 and myBuff > 0 then
+                if mq.TLO.Me.XTarget() > 0 and Bravery > 0 then
                     return true
                 end
                 return false
             end},
             [4] = {[self.Common.BraceForImpact] = function() -- SPA162
-                local myBuff = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0
+                local Bravery = mq.TLO.Me.Buff(self.Common.WarlordsBravery).ID() or 0
 
-                if mq.TLO.Me.XTarget() > 0 and myBuff > 0 then
+                if mq.TLO.Me.XTarget() > 0 and Bravery > 0 then
                     return true
                 end
                 return false

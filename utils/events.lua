@@ -37,3 +37,9 @@ end
 mq.event('interrupt', "Your spell is interrupted#*#", interrupt)
 mq.event('interrupt', "Your casting has been interrupted#*#", interrupt)
 mq.event('interrupt', "Your #1# spell is interrupted.", interrupt)
+
+local cantCastOnTarget = function(line, arg1, arg2)
+    Write.Info("\arCannot cast on target!")
+    CANTCASTONTARGET = true
+end
+mq.event('cantCastOnTarget', "#*#You cannot cast #1# on #2##*#", cantCastOnTarget)

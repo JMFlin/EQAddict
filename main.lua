@@ -5,6 +5,8 @@ local traveler = require('eqaddict/utils/traveler')
 local AddictCharacter
 local classutils
 
+math.randomseed(os.time())
+
 -- Write config
 Write.prefix = function() return '\ax['..mq.TLO.Time()..'] [\agAddict\ax] ' end
 Write.loglevel = 'debug'
@@ -25,6 +27,8 @@ elseif mq.TLO.Me.Class.ShortName() == "CLR" then
     AddictCharacter = Cleric.new()
 end
 
+Traveler = extendingTraveler.new()
+
 local enabled = true
 
 -- globals for events
@@ -32,6 +36,7 @@ local CASTFIZZLED = false
 local CANTSEETARGET = false
 local ISIMMUNE = false
 local ISINTERRUPTED = false
+local CANTCASTONTARGET = false
 
 -- globals for skill rotations via dannet
 if mq.TLO.Defined("ALLIANCETURN") then mq.cmd("/deletevar ALLIANCETURN") end
@@ -102,6 +107,7 @@ local function check_plugins()
         mq.cmdf('/plugin mq2dannet load noauto')
         Write.Info('\agLoading mq2dannet.')
     end
+    mq.cmdf('/nav Reload')
 end
 
 local function setup()
@@ -157,7 +163,6 @@ local function main()
 end
 
 setup()
-AddictCharacter.setMode(Modes.CAMP)
 main()
 
 
