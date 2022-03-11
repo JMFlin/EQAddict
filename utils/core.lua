@@ -137,7 +137,7 @@ State = {
                 
                 -- Actually trigger the cast
                 mq.cmdf(command, skill)
-                mq.delay(750)
+                mq.delay(1000, function() return mq.TLO.Me.Casting.ID() ~= nil end)
 
                 -- If I am not casting anymore then get me out
                 while mq.TLO.Me.Casting.ID() ~= nil or mq.TLO.Window["CastingWindow"].Open() do mq.delay(250) end
