@@ -78,7 +78,7 @@ extendingTargeter.new = function(name, class)
             local targetID = getLowestHPTarget()
             self.setTargetID(targetID)
             mq.cmdf('/mqtarget id %d', self.getTargetID())
-            mq.delay(250, function() return self.getTargetID() == targetID end)
+            mq.delay(500, function() return self.getTargetID() == targetID end)
         end
     end
 
@@ -101,7 +101,7 @@ extendingTargeter.new = function(name, class)
 
         self.setTargetID(targetID)
         mq.cmdf('/mqtarget id %d', self.getTargetID())
-        mq.delay(250, function() return self.getTargetID() == targetID end)
+        mq.delay(500, function() return self.getTargetID() == targetID end)
 
         -- If we got a target
         if self.getTargetID() > 0 then
@@ -124,7 +124,7 @@ extendingTargeter.new = function(name, class)
             local targetID = getLowestHPTarget()
             self.setTargetID(targetID)
             mq.cmdf('/mqtarget id %d', self.getTargetID())
-            mq.delay(250, function() return self.getTargetID() == targetID end)
+            mq.delay(500, function() return self.getTargetID() == targetID end)
         end
 
         -- If we got a target
@@ -165,7 +165,7 @@ extendingTargeter.new = function(name, class)
                 self.setState(State.MEMBERTARGET)
                 self.setTargetID(mq.TLO.Me.XTarget(1).ID())
                 mq.cmdf('/mqtarget id %d', self.getTargetID())
-                mq.delay(250, function() return self.getTargetID() == mq.TLO.Me.XTarget(1).ID() end)
+                mq.delay(500, function() return self.getTargetID() == mq.TLO.Me.XTarget(1).ID() end)
             elseif mq.TLO.Me.ID() == mq.TLO.Group.MainAssist.ID() then
                 self.setState(State.MATARGET)
                 getTargetMA()
