@@ -52,35 +52,35 @@ local steinOne = function()
     mq.cmd("/target galdorin")
     mq.cmd("/say My stinky stein has rough dirty lips,")
 end
-mq.event('steinOne', "#*#Galdorin Visigothe says 'My stinky stein has rough dirty lips,'#*#", steinOne)
+mq.event('steinOne', "#*#Galdorin Visigothe says, 'My stinky stein has rough dirty lips,'#*#", steinOne)
 
 local steinTwo = function()
     mq.cmd("/target galdorin")
     mq.cmd("/say but she loves a deep carouse.")
 end
-mq.event('steinTwo', "#*#Galdorin Visigothe says 'but she loves a deep carouse.'#*#", steinTwo)
+mq.event('steinTwo', "#*#Galdorin Visigothe says, 'but she loves a deep carouse.'#*#", steinTwo)
 
 local steinThree = function()
     mq.cmd("/target galdorin")
     mq.cmd("/say Beer or ale are her great trips.")
 end
-mq.event('steinThree', "#*#Galdorin Visigothe says 'Beer or ale are her great trips.'#*#", steinThree)
+mq.event('steinThree', "#*#Galdorin Visigothe says, 'Beer or ale are her great trips.'#*#", steinThree)
 
 
 local steinFour = function()
     mq.cmd("/target galdorin")
     mq.cmd("/say No matter how many vows")
 end
-mq.event('steinFour', "#*#Galdorin Visigothe says 'No matter how many vows'#*#", steinFour)
+mq.event('steinFour', "#*#Galdorin Visigothe says, 'No matter how many vows'#*#", steinFour)
 
 local steinFive = function()
     mq.cmd("/target galdorin")
     mq.cmd("/say I make or break, my drinking glass")
 end
-mq.event('steinFive', "#*#Galdorin Visigothe says 'I make or break, my drinking glass'#*#", steinFive)
+mq.event('steinFive', "#*#Galdorin Visigothe says, 'I make or break, my drinking glass'#*#", steinFive)
 
 local steinSix = function()
     mq.cmd("/target galdorin")
     mq.cmd("/say reminds me of my lovely Brasse.")
 end
-mq.event('steinSix', "#*#Galdorin Visigothe says 'reminds me of my lovely Brasse.'#*#", steinSix)
+mq.event('steinSix', "#*#Galdorin Visigothe says, 'reminds me of my lovely Brasse.'#*#", steinSix)
