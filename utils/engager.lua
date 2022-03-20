@@ -141,13 +141,10 @@ extendingEngager.new = function(name, class)
     function self.petAttack()
         if mq.TLO.Me.Pet.ID() > 0 then
             if mq.TLO.Me.Pet.Target.ID() ~= self.getTargetID() then mq.cmd('/pet attack') end
-            mq.delay(100)
             if mq.TLO.Me.Pet.Target.ID() ~= self.getTargetID() then  mq.cmd('/pet swarm') end
-            mq.delay(100)
             if mq.TLO.Me.XTarget() > 0 then
                 if ((mq.TLO.Group.MainTank.ID() ~= nil or mq.TLO.Spawn("id " .. mq.TLO.Group.MainTank.ID() .. " pccorpse radius 100").ID() > 0) and not mq.TLO.Me.Pet.Taunt()) then
                     mq.cmd('/pet taunt on')
-                    mq.delay(100)
                 end
             end
             if not mq.TLO.Spawn("id " .. mq.TLO.Group.MainTank.ID() .. " pccorpse radius 100").ID() and mq.TLO.Me.Pet.Taunt() then mq.cmd('/pet taunt off') end

@@ -169,6 +169,10 @@ setup()
 main()
 
 
+-- Tank to use ability and scan for adds with coroutines
+-- https://gist.github.com/torus/141352
+
+
 -- baseCharacter -> traveler -> priest -> class
 -- baseCharacter -> targeter -> engager -> puller -> camper -> priest -> class -> missioner
 
