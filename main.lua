@@ -159,7 +159,12 @@ local function main()
                 AddictCharacter.dead()
                 ]]
                 mq.delay(500)
-                mq.doevents()
+                mq.doevents("steinOne")
+                mq.doevents("steinTwo")
+                mq.doevents("steinThree")
+                mq.doevents("steinFour")
+                mq.doevents("steinFive")
+                mq.doevents("steinSix")
             end
         end
     end
