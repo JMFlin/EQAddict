@@ -58,8 +58,8 @@ State = {
     local targetName
 
     local immuneTable = {}
-    local abilityDelay = 200
-    local abilityDelayVariance = 100
+    local abilityDelay = 250
+    local abilityDelayVariance = 50
 
     self.state = "Starting"
 

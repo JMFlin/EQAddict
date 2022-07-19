@@ -52,8 +52,12 @@ extendingPuller.new = function(name, class)
         if mq.TLO.Me.Cursed.ID() then return false end
         if mq.TLO.Me.Corrupted.ID() then return false end
         if mq.TLO.Me.Casting.ID() then return false end
-        if mq.TLO.Me.XTarget() > 0 then return false end
         if mq.TLO.Spawn("id " .. self.getTargetID()).Type() == "Corpse" then mq.cmd("/target clear") end
+
+        -- chain pull
+        if mq.TLO.Me.XTarget() > 1 then return false end
+        if mq.TLO.Spawn("id " .. self.getTargetID()).PctHPs() > 30 then return false end
+        if mq.TLO.Spawn("id " .. self.getTargetID()).Named() then return false end
 
         local ready = false
         for key, value in ipairs(self.PullsTag) do

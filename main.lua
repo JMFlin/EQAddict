@@ -144,8 +144,14 @@ local function main()
             AddictCharacter.setCampSpot(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
             while AddictCharacter.getMode() == Modes.CAMP and in_game() do
                 
+                -- Downtime
+                AddictCharacter.buffRotation()
+                AddictCharacter.rezzRotation()
+                AddictCharacter.createCampfire()
+                AddictCharacter.meditate()
+                AddictCharacter.dead()
                 AddictCharacter.returnToCamp()
-                
+
                 -- Action
                 AddictCharacter.pullRoutine()
                 AddictCharacter.getOffensiveTarget()
@@ -153,12 +159,6 @@ local function main()
                 AddictCharacter.engageMeleeOffensive()
                 AddictCharacter.engageDefensive()
 
-                -- Downtime
-                AddictCharacter.buffRotation()
-                AddictCharacter.rezzRotation()
-                AddictCharacter.createCampfire()
-                AddictCharacter.meditate()
-                AddictCharacter.dead()
                 mq.delay(500)
 
             end
