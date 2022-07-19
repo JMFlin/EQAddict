@@ -1,6 +1,7 @@
 local mq = require('mq')
 local Write = require('lib/Write')
 local priest = require('eqaddict/classutils/fighter')
+local dannet = require('eqaddict/dannet/helpers')
 
 -- Transcended Fistwraps of Immortality
 -- Miniature Horn of Unity
@@ -153,6 +154,25 @@ Monk.new = function(name, class)
             [10] = {[self.Common.Precision2] = function() return true end},
             [11] = {[self.Common.Precision3] = function() return true end},
             [12] = {[self.Common.BP] = function() return true end},
+            [13] = {[self.Common.Alliance] = function()
+                local result, name
+                local alliance = mq.TLO.Target.Buff(self.Common.Alliance).ID() or 0
+
+                if ALLIANCETURN and alliance == 0 then
+
+                    -- Set own turn to false
+                    mq.cmd('/varset ALLIANCETURN FALSE')
+
+                    -- Set next character
+                    result = tonumber(dannet.execute(name, '/varset ALLIANCETURN TRUE')) or 0
+                    if result == 0 then
+                        Write.Debug("\arFailed to set next alliance character")
+                    else
+                        return true
+                    end
+                end
+                return false
+            end},
         }
 
         self.OffensiveRotation1 = {

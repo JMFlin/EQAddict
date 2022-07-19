@@ -96,3 +96,19 @@ function setGroupRoles()
         end
     end
 end
+
+
+function setAllianceTable()
+    -- https://www.lua.org/pil/19.3.html
+    -- config.inc
+    -- NOT DONE
+    local indexPosition
+    local namePosition
+
+    for i=1, mq.TLO.Group() do
+        if mq.TLO.Group.Member(i).Class.ShortName() == mq.TLO.Me.Class.ShortName() then
+            indexPosition = i
+            namePosition = mq.TLO.Group.Member(i).Name.Lower()
+        end
+    end
+end

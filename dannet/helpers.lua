@@ -31,4 +31,12 @@ function helpers.unobserve(peer, query)
     Write.Debug(string.format('\ayRemoving Observer - mq.TLO.DanNet(%s).O(%s) = %s', peer, query, mq.TLO.DanNet(peer).O(query)()))
 end
 
+function helpers.execute(peer, query, timeout)
+    mq.cmdf('/dexecute %s -q "%s"', peer, query)
+    mq.delay(timeout or 1000)
+    local value = mq.TLO.DanNet(peer).Q(query)()
+    Write.Debug(string.format('\ayExecuting - mq.TLO.DanNet(%s).Q(%s) = %s', peer, query, value))
+    return value
+end
+
 return helpers
