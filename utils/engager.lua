@@ -58,14 +58,14 @@ extendingEngager.new = function(name, class)
 
         if mq.TLO.Me.ID() == mq.TLO.Group.MainTank.ID() then
             if not mq.TLO.Stick.Active() then
-                mq.cmd('/stick 50% moveback loose')
+                mq.cmd('/stick 50% randomize delaystrafe moveback loose')
                 mq.delay(500, function() return mq.TLO.Stick.Active() end)
             end
         end
 
         if mq.TLO.Me.ID() ~= mq.TLO.Group.MainTank.ID() then
             if not mq.TLO.Stick.Active() then
-                mq.cmd('/stick ' .. math.floor(math.random(35, 65)) .. '% ' .. self.stick .. ' loose')
+                mq.cmd('/stick ' .. math.floor(math.random(35, 65)) .. '% randomize delaystrafe ' .. self.stick .. ' loose')
                 mq.delay(500, function() return mq.TLO.Stick.Active() end)
             end
         end
