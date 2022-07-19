@@ -143,28 +143,24 @@ local function main()
             if mq.TLO.Me.Class.ShortName() == "SHM" then AddictCharacter.activateRotation(AddictCharacter.GroupShrink) end
             AddictCharacter.setCampSpot(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
             while AddictCharacter.getMode() == Modes.CAMP and in_game() do
-                --[[
+                
                 AddictCharacter.returnToCamp()
-                AddictCharacter.buffRotation()
-                AddictCharacter.rezzRotation()
+                
+                -- Action
                 AddictCharacter.pullRoutine()
                 AddictCharacter.getOffensiveTarget()
                 AddictCharacter.engageRangeOffensive()
                 AddictCharacter.engageMeleeOffensive()
                 AddictCharacter.engageDefensive()
 
-                -- downtime
+                -- Downtime
+                AddictCharacter.buffRotation()
+                AddictCharacter.rezzRotation()
                 AddictCharacter.createCampfire()
                 AddictCharacter.meditate()
                 AddictCharacter.dead()
-                ]]
                 mq.delay(500)
-                mq.doevents("steinOne")
-                mq.doevents("steinTwo")
-                mq.doevents("steinThree")
-                mq.doevents("steinFour")
-                mq.doevents("steinFive")
-                mq.doevents("steinSix")
+
             end
         end
     end
