@@ -252,20 +252,10 @@ extendingPuller.new = function(name, class)
     end
 
     local function tagPullTarget()
---        local counter = 0
             
         self.activateRotation(self.PullsTag)
         mq.delay(1000, function() return mq.TLO.Me.XTarget() > 0 end)
-        
---[[
-        if mq.TLO.Me.XTarget() == 0 then
-            counter = counter + 1
-            if counter == 4 then
-                Write.Debug("\a-rAdding \a-p" .. self.getTargetID() .. " \a-rto ignore")
-                mq.cmd('/squelch /alert add 1 id ' .. self.getTargetID())
-            end
-        end
-]]
+
         mq.doevents("cantCastOnTarget")
         if CANTCASTONTARGET then
             Write.Debug("\a-rAdding \a-p" .. self.getTargetID() .. " \a-rto ignore")
@@ -278,8 +268,9 @@ extendingPuller.new = function(name, class)
         if CANTSEETARGET then
             CANTSEETARGET = false
             for i=1, 3 do
-                self.nudgeForward()
-                self.activateRotation(self.PullsTag)
+                if mq.TLO.Me.XTarget() == 0 then self.activateRotation(self.PullsTag) end
+                if mq.TLO.Me.XTarget() == 0 then self.nudgeForward() end
+                if mq.TLO.Me.XTarget() == 0 then self.activateRotation(self.PullsTag) end
                 mq.delay(1000, function() return mq.TLO.Me.XTarget() > 0 end)
                 if mq.TLO.Me.XTarget() > 0 then return end
             end
@@ -314,6 +305,7 @@ extendingPuller.new = function(name, class)
             -- If we lose the target during running back (chokidai fade)
             -- then we need to get a target again
             if mq.TLO.Me.XTarget() == 0 then tagPullTarget() end
+
             mq.delay(250)
         end
         if mq.TLO.Navigation.Active() then mq.cmd('/nav stop') end
@@ -373,8 +365,11 @@ extendingPuller.new = function(name, class)
             if selfValidatePullStart() then navToPullTarget() end
 
             self.setState(State.TAG)
+
             -- Pass target to tag logic
             if selfValidatePullStart() then tagPullTarget() end
+
+            mq.delay(250)
         end
 
         self.setState(State.PULL)

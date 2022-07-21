@@ -132,8 +132,13 @@ Monk.new = function(name, class)
                 end
                 return false
             end},
-            [3] = {[self.Common.Intimidation] = function() return true end},
-            [4] = {[self.Common.EyeOfTheStorm] = function() 
+            [3] = {[self.Common.EyeOfTheStorm] = function() 
+                if mq.TLO.Me.ActiveDisc.ID() == 0 then
+                    return true
+                end
+                return false
+            end},
+            [4] = {[self.Common.EarthForce] = function()
                 if mq.TLO.Me.ActiveDisc.ID() == 0 then
                     return true
                 end
@@ -565,7 +570,8 @@ Monk.new = function(name, class)
         }
 
         self.Debuffs = {
-            [1] = {[self.Common.WaspTouch] = function()
+            [1] = {[self.Common.Intimidation] = function() return true end},
+            [2] = {[self.Common.WaspTouch] = function()
                 local targetBuff = mq.TLO.Target.Buff(self.Common.WaspTouch).ID() or 0
                 
                 if targetBuff == 0 then

@@ -133,15 +133,32 @@ local function in_game() return mq.TLO.MacroQuest.GameState() == 'INGAME' end
 
 local function main()
     while enabled do
+
+        -- Manual mode: do what you want
         while AddictCharacter.getMode() == Modes.MANUAL and in_game() do mq.delay(1000) end
+
+        -- Travel mode: following the leader but also reacting to adds
         while AddictCharacter.getMode() == Modes.TRAVEL and in_game() do
             Traveler.followTheLeader()
             AddictCharacter.dead()
+            AddictCharacter.rezzRotation()
+            AddictCharacter.getOffensiveTarget()
+            AddictCharacter.engageRangeOffensive()
+            AddictCharacter.engageMeleeOffensive()
+            AddictCharacter.engageDefensive()
             mq.delay(500)
         end
+
+        -- Camp mode: pulling and grinding
         if AddictCharacter.getMode() == Modes.CAMP then
+
+            -- Shrink group
             if mq.TLO.Me.Class.ShortName() == "SHM" then AddictCharacter.activateRotation(AddictCharacter.GroupShrink) end
+            
+            -- Set camp
             AddictCharacter.setCampSpot(mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
+
+            -- Camp loop
             while AddictCharacter.getMode() == Modes.CAMP and in_game() do
                 
                 -- Downtime

@@ -491,23 +491,6 @@ if it triggers best in group, and that has triggers then you get each trigger fr
             [1] = {[self.Common.Malo] = function() return true end},
         }
 
-        self.groupBuffs = {
-            [1] = {[self.Common.GroupFocus] = function() return true end},
-            [2] = {[self.Common.GroupHaste] = function() return true end},
-            [3] = {[self.Common.GroupSpeed] = function() return true end},
-            [4] = {[self.Common.GroupCheetah] = function() return true end},
-        }
-
-        self.selfBuffs = {
-            [1] = {[self.Common.SelfPreincarnation] = function() return true end},
-            [2] = {[self.Common.VisionarysUnity] = function() return true end},
-            [3] = {[self.Common.Aura] = function() return true end},
-            [4] = {[self.Common.GroupFocus] = function() return true end},
-            [5] = {[self.Common.GroupHaste] = function() return true end},
-            [6] = {[self.Common.GroupSpeed] = function() return true end},
-            [7] = {[self.Common.GroupCheetah] = function() return true end},
-        }
-
         self.Utility = {
             [1] = {[self.Common.Canni] = function()
                 if mq.TLO.Me.PctHPs() > 45 and mq.TLO.Me.PctMana() < 80 then
@@ -607,6 +590,23 @@ if it triggers best in group, and that has triggers then you get each trigger fr
                 end
                 return false
             end},
+        }
+
+        self.groupBuffs = {
+            [1] = {[self.Common.GroupFocus] = function() return true end},
+            [2] = {[self.Common.GroupHaste] = function() return true end},
+            [3] = {[self.Common.GroupSpeed] = function() return true end},
+            [4] = {[self.Common.GroupCheetah] = function() return true end},
+        }
+
+        self.selfBuffs = {
+            [1] = {[self.Common.SelfPreincarnation] = function() return true end},
+            [2] = {[self.Common.VisionarysUnity] = function() return true end},
+            [3] = {[self.Common.Aura] = function() return true end},
+            [4] = {[self.Common.GroupFocus] = function() return true end},
+            [5] = {[self.Common.GroupHaste] = function() return true end},
+            [6] = {[self.Common.GroupSpeed] = function() return true end},
+            [7] = {[self.Common.GroupCheetah] = function() return true end},
         }
 
         self.tankBuffs = {
